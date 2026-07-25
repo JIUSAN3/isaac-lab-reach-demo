@@ -1,0 +1,69 @@
+# Minimal Reach task config — shared by mock mode and (conceptually) Isaac Lab
+# Official Isaac task id when you have a GPU: Isaac-Reach-Franka-v0
+#
+# Plan A (T4 16GB cloud): use train.plan_a_*  — NOT the full-scale 4096 envs.
+
+task:
+  name: reach_franka
+  isaac_task_id: Isaac-Reach-Franka-v0
+  isaac_play_task_id: Isaac-Reach-Franka-Play-v0
+  description: >
+    Move Franka Panda end-effector to a randomly sampled 3D target.
+    Mock mode uses a simplified 7-DoF kinematic arm; Isaac mode uses the
+    official manager-based env with PhysX.
+
+robot:
+  name: franka_panda
+  dof: 7
+  # Joint position limits (rad) — approximate Panda ranges for mock
+  joint_limits_low:  [-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973]
+  joint_limits_high: [ 2.8973,  1.7628,  2.8973, -0.0698,  2.8973,  3.7525,  2.8973]
+  # Approximate link lengths (m) for mock FK (base, shoulder, upper, offset, fore, wrist, tip)
+  link_lengths: [0.15, 0.10, 0.35, 0.05, 0.30, 0.05, 0.08]
+  max_joint_delta: 0.08   # rad per step (action scale / safety clamp)
+
+env:
+  num_envs: 1             # mock default; Isaac Plan A uses train.plan_a_num_envs
+  episode_length: 200     # steps
+  dt: 0.02                # 50 Hz control — soft-realtime-ish period
+  success_threshold: 0.05 # m, EE-to-target distance
+  target_workspace:
+    low:  [0.25, -0.25, 0.15]
+    high: [0.55,  0.25, 0.45]
+
+observation:
+  # Conceptual mock layout — replace with live Isaac dims in isaac_run_notes.md
+  keys:
+    - joint_pos       # 7
+    - joint_vel       # 7
+    - ee_pos          # 3
+    - target_pos      # 3
+  dim: 20
+
+action:
+  type: joint_position_delta   # relative joint cmd, then clamped
+  dim: 7
+  scale: 0.08                  # maps [-1,1] policy output -> rad delta
+
+reward:
+  # r = -||ee - target|| + success_bonus - action_penalty  (mock)
+  position_weight: 1.0
+  success_bonus: 10.0
+  action_l2_weight: 0.01
+  success_threshold: 0.05
+
+train:
+  library: rsl_rl
+  seed: 42
+  headless: true
+  # Full-scale (24GB+ only; do NOT use on T4 by default)
+  num_envs: 4096
+  max_iterations: 300
+  # Plan A / T4 16GB short train (scripts/train_reach_plan_a.sh)
+  plan_a_num_envs: 64
+  plan_a_max_iterations: 150
+  plan_a_oom_fallback: [32, 16, 8]
+
+play:
+  num_envs: 4                  # Plan A default (was 16; safer on 16GB)
+  use_pretrained_checkpoint: true

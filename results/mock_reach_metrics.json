@@ -1,0 +1,20 @@
+{
+  "backend": "mock",
+  "isaac_task_id": "Isaac-Reach-Franka-v0",
+  "controller": "p_reach",
+  "seed": 0,
+  "episodes": 1,
+  "success_rate": 1.0,
+  "mean_return": 9.785004362427692,
+  "mean_final_distance": 0.04808331655094128,
+  "episodes_detail": [
+    {
+      "episode": 0,
+      "steps": 3,
+      "success": true,
+      "final_distance": 0.04808331655094128,
+      "return": 9.785004362427692
+    }
+  ],
+  "notes": "Mock kinematics on CPU. Replace backend with Isaac Lab Isaac-Reach-Franka-v0 on a NVIDIA GPU machine."
+}

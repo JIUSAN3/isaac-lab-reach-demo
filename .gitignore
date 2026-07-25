@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# local bulk downloads (selected evidence is force-added under results/)
+results_bundle/
+nvidiademo_results_bundle/
+*.tar.gz
+machine_info.txt
+
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+_isaac_sim/
+logs/
+outputs/
+*.kit
